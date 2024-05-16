@@ -103,7 +103,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Título
-st.title('Calculadora de Opções Avançada')
+st.title('Calculadora de Opções')
 
 # Sidebar para entrada de dados
 st.write("## Parâmetros de Entrada")
