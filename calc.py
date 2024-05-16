@@ -1,4 +1,4 @@
-pip Install yfinance
+conda install -c conda-forge yfinance
 
 import streamlit as st
 import numpy as np
