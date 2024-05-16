@@ -1,4 +1,4 @@
-pip install --user yfinance
+pip Install yfinance
 
 import streamlit as st
 import numpy as np
