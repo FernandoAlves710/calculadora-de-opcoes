@@ -148,14 +148,15 @@ if simbolo:
 
     elif option_type == "Asiática":
         if st.button('Calcular Preço da Opção'):
-            preco_opcao = monte_carlo_option_pricing_asian(S, K, T, r, volatility)
+            preco_opcao = monte_carlo_option_pricing_american(S, K, T, r, volatility)
+            vol_imp = implied_volatility(S, K, T, r, preco_opcao)
             st.success(f"Preço da Opção Calculada: ${preco_opcao:.2f}")
             st.write("### Gregas:")
             st.write(f"Delta: {delta(S, K, T, r, volatility):.4f} (sensibilidade do preço da opção em relação ao preço do ativo subjacente)")
             st.write(f"Gamma: {gamma(S, K, T, r, volatility):.4f} (sensibilidade do delta em relação ao preço do ativo subjacente)")
             st.write(f"Vega: {vega(S, K, T, r, volatility):.4f} (sensibilidade do preço da opção em relação à volatilidade do ativo subjacente)")
             st.write("### Volatilidade Implícita:")
-            st.write(f"{vol_imp:.2%}", cls="result")
+            st.write(f"{vol_imp:.2%}")
             st.write("Descrição: Volatilidade implícita é a volatilidade futura do ativo subjacente, inferida do preço atual da opção.")
 
     st.write("## Histórico de Preços")
