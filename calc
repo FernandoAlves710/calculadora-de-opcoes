@@ -117,5 +117,3 @@ if simbolo:
     fig.update_layout(title='Histórico de Preços do Ativo nos Últimos 12 Meses',
                       xaxis_title='Data', yaxis_title='Preço')
     st.plotly_chart(fig)
-
-    st.plotly_chart(fig)
