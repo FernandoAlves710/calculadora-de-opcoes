@@ -1,7 +1,7 @@
 pip install yahoo-finance
 import streamlit as st
 import numpy as np
-import yfinance as yf
+import yahoo-finance as yf
 from scipy.stats import norm
 from scipy.optimize import brentq
 import plotly.graph_objects as go
