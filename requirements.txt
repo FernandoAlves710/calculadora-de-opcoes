@@ -1,0 +1,9 @@
+altair
+numpy
+pandas
+pydeck
+streamlit
+scipy
+matplotlib
+plotly
+yfinance
