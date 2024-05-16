@@ -74,7 +74,7 @@ def implied_volatility(S, K, T, r, option_price, option_type='call'):
     return implied_vol
 
 # Interface do usuário
-st.set_page_config(page_title="Calculadora de Opções Avançada", layout="wide", page_icon="📈")
+st.set_page_config(page_title="Calculadora de Opções", layout="wide", page_icon="📈")
 
 # Estilos personalizados
 st.markdown("""
