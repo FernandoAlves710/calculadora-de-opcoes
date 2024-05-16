@@ -5,7 +5,6 @@ from scipy.stats import norm
 from scipy.optimize import brentq
 import plotly.graph_objects as go
 
-# Função para obter os dados do ativo (ação ou ETF) do Yahoo Finance
 def get_stock_data(ticker_symbol):
     stock = yf.Ticker(ticker_symbol)
     hist = stock.history(period="1y")  # Dados históricos do último ano
@@ -14,7 +13,6 @@ def get_stock_data(ticker_symbol):
     volatility = np.std(daily_returns) * np.sqrt(252)  # Volatilidade anualizada
     return last_price, volatility, hist
 
-# Função para calcular o preço da opção usando o modelo de Black-Scholes
 def black_scholes(S, K, T, r, sigma, option_type='call'):
     d1 = (np.log(S / K) + (r + sigma**2 / 2) * T) / (sigma * np.sqrt(T))
     d2 = d1 - sigma * np.sqrt(T)
@@ -23,7 +21,6 @@ def black_scholes(S, K, T, r, sigma, option_type='call'):
     else:
         return K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
 
-# Função para calcular o preço da opção americana usando o método de Monte Carlo
 def monte_carlo_option_pricing_american(S, K, T, r, sigma, num_simulations=10000):
     dt = T / 365
     Z = np.random.normal(0, 1, (num_simulations, int(T * 365)))
@@ -32,7 +29,6 @@ def monte_carlo_option_pricing_american(S, K, T, r, sigma, num_simulations=10000
     option_price = np.exp(-r * T) * np.mean(payoff, axis=1)
     return np.mean(option_price)
 
-# Função para calcular o preço da opção asiática usando o método de Monte Carlo
 def monte_carlo_option_pricing_asian(S, K, T, r, sigma, num_simulations=10000):
     dt = T / 365
     Z = np.random.normal(0, 1, (num_simulations, int(T * 365)))
@@ -48,17 +44,14 @@ def delta(S, K, T, r, sigma, option_type='call'):
     else:
         return norm.cdf(d1) - 1
 
-# Função para calcular o gamma da opção usando o modelo de Black-Scholes
 def gamma(S, K, T, r, sigma):
     d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * np.sqrt(T))
     return norm.pdf(d1) / (S * sigma * np.sqrt(T))
 
-# Função para calcular o vega da opção usando o modelo de Black-Scholes
 def vega(S, K, T, r, sigma):
     d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * np.sqrt(T))
     return S * norm.pdf(d1) * np.sqrt(T)
 
-# Função para calcular a volatilidade implícita
 def implied_volatility(S, K, T, r, option_price, option_type='call'):
     def black_scholes_iv(sigma):
         if option_type == 'call':
@@ -73,10 +66,8 @@ def implied_volatility(S, K, T, r, option_price, option_type='call'):
 
     return implied_vol
 
-# Interface do usuário
 st.set_page_config(page_title="Calculadora de Opções", layout="wide", page_icon="📈")
 
-# Estilos personalizados
 st.markdown("""
 <style>
     .big-font {
@@ -102,10 +93,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Título
 st.title('Calculadora de Opções')
 
-# Sidebar para entrada de dados
 st.write("## Parâmetros de Entrada")
 simbolo = st.text_input("Digite o símbolo do ativo desde moedas, ações, commodities e etfs (ex: AAPL):")
 
