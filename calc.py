@@ -41,6 +41,37 @@ def monte_carlo_option_pricing_asian(S, K, T, r, sigma, num_simulations=10000):
     payoff = np.maximum(ST_mean - K, 0)
     option_price = np.exp(-r * T) * np.mean(payoff)
     return option_price
+def delta(S, K, T, r, sigma, option_type='call'):
+    d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * np.sqrt(T))
+    if option_type == 'call':
+        return norm.cdf(d1)
+    else:
+        return norm.cdf(d1) - 1
+
+# Função para calcular o gamma da opção usando o modelo de Black-Scholes
+def gamma(S, K, T, r, sigma):
+    d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * np.sqrt(T))
+    return norm.pdf(d1) / (S * sigma * np.sqrt(T))
+
+# Função para calcular o vega da opção usando o modelo de Black-Scholes
+def vega(S, K, T, r, sigma):
+    d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * np.sqrt(T))
+    return S * norm.pdf(d1) * np.sqrt(T)
+
+# Função para calcular a volatilidade implícita
+def implied_volatility(S, K, T, r, option_price, option_type='call'):
+    def black_scholes_iv(sigma):
+        if option_type == 'call':
+            return black_scholes(S, K, T, r, sigma) - option_price
+        else:
+            return black_scholes(S, K, T, r, sigma, option_type='put') - option_price
+
+    try:
+        implied_vol = brentq(black_scholes_iv, 0.01, 1)
+    except ValueError:
+        implied_vol = np.nan
+
+    return implied_vol
 
 # Interface do usuário
 st.set_page_config(page_title="Calculadora de Opções Avançada", layout="wide", page_icon="📈")
