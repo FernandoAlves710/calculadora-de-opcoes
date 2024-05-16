@@ -23,72 +23,24 @@ def black_scholes(S, K, T, r, sigma, option_type='call'):
     else:
         return K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
 
-# Função para calcular o preço da opção americana usando o modelo binomial
-def binomial_option_pricing(S, K, T, r, sigma, n=100):
-    dt = T / n
-    u = np.exp(sigma * np.sqrt(dt))
-    d = 1 / u
-    p = (np.exp(r * dt) - d) / (u - d)
-
-    prices = np.zeros((n + 1, n + 1))
-    prices[0, 0] = S
-
-    for i in range(1, n + 1):
-        prices[i, 0] = prices[i - 1, 0] * u
-        for j in range(1, i + 1):
-            prices[i, j] = prices[i - 1, j - 1] * d
-
-    option_values = np.zeros((n + 1, n + 1))
-    for j in range(n + 1):
-        option_values[n, j] = max(0, prices[n, j] - K)
-
-    for i in range(n - 1, -1, -1):
-        for j in range(i + 1):
-            option_values[i, j] = np.exp(-r * dt) * (p * option_values[i + 1, j] + (1 - p) * option_values[i + 1, j + 1])
-
-    return option_values[0, 0]
+# Função para calcular o preço da opção americana usando o método de Monte Carlo
+def monte_carlo_option_pricing_american(S, K, T, r, sigma, num_simulations=10000):
+    dt = T / 365
+    Z = np.random.normal(0, 1, (num_simulations, int(T * 365)))
+    ST = S * np.exp(np.cumsum((r - 0.5 * sigma ** 2) * dt + sigma * np.sqrt(dt) * Z, axis=1))
+    payoff = np.maximum(ST - K, 0)
+    option_price = np.exp(-r * T) * np.mean(payoff, axis=1)
+    return np.mean(option_price)
 
 # Função para calcular o preço da opção asiática usando o método de Monte Carlo
-def monte_carlo_option_pricing(S, K, T, r, sigma, num_simulations=10000):
+def monte_carlo_option_pricing_asian(S, K, T, r, sigma, num_simulations=10000):
     dt = T / 365
-    Z = np.random.normal(0, 1, num_simulations)
-    ST = S * np.exp((r - 0.5 * sigma ** 2) * dt + sigma * np.sqrt(dt) * Z)
-    payoff = np.maximum(ST - K, 0)
+    Z = np.random.normal(0, 1, (num_simulations, int(T * 365)))
+    ST = S * np.exp(np.cumsum((r - 0.5 * sigma ** 2) * dt + sigma * np.sqrt(dt) * Z, axis=1))
+    ST_mean = np.mean(ST, axis=1)
+    payoff = np.maximum(ST_mean - K, 0)
     option_price = np.exp(-r * T) * np.mean(payoff)
     return option_price
-
-# Função para calcular o delta da opção usando o modelo de Black-Scholes
-def delta(S, K, T, r, sigma, option_type='call'):
-    d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * np.sqrt(T))
-    if option_type == 'call':
-        return norm.cdf(d1)
-    else:
-        return norm.cdf(d1) - 1
-
-# Função para calcular o gamma da opção usando o modelo de Black-Scholes
-def gamma(S, K, T, r, sigma):
-    d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * np.sqrt(T))
-    return norm.pdf(d1) / (S * sigma * np.sqrt(T))
-
-# Função para calcular o vega da opção usando o modelo de Black-Scholes
-def vega(S, K, T, r, sigma):
-    d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * np.sqrt(T))
-    return S * norm.pdf(d1) * np.sqrt(T)
-
-# Função para calcular a volatilidade implícita
-def implied_volatility(S, K, T, r, option_price, option_type='call'):
-    def black_scholes_iv(sigma):
-        if option_type == 'call':
-            return black_scholes(S, K, T, r, sigma) - option_price
-        else:
-            return black_scholes(S, K, T, r, sigma, option_type='put') - option_price
-
-    try:
-        implied_vol = brentq(black_scholes_iv, 0.01, 1)
-    except ValueError:
-        implied_vol = np.nan
-
-    return implied_vol
 
 # Interface do usuário
 st.set_page_config(page_title="Calculadora de Opções Avançada", layout="wide", page_icon="📈")
@@ -148,10 +100,22 @@ if simbolo:
             st.write("### Volatilidade Implícita:")
             st.write(f"{vol_imp:.2%}", cls="result")
             st.write("Descrição: Volatilidade implícita é a volatilidade futura do ativo subjacente, inferida do preço atual da opção.")
+    
+    elif option_type == "Americana":
+        if st.button('Calcular Preço da Opção'):
+            preco_opcao = monte_carlo_option_pricing_american(S, K, T, r, volatility)
+            st.success(f"Preço da Opção Calculada: ${preco_opcao:.2f}")
+
+    elif option_type == "Asiática":
+        if st.button('Calcular Preço da Opção'):
+            preco_opcao = monte_carlo_option_pricing_asian(S, K, T, r, volatility)
+            st.success(f"Preço da Opção Calculada: ${preco_opcao:.2f}")
 
     st.write("## Histórico de Preços")
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=hist.index, y=hist['Close'], mode='lines', name='Close Price'))
     fig.update_layout(title='Histórico de Preços do Ativo nos Últimos 12 Meses',
                       xaxis_title='Data', yaxis_title='Preço')
+    st.plotly_chart(fig)
+
     st.plotly_chart(fig)
